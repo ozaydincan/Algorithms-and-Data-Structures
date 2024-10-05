@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define ID_LEN 4
 #define MAX_LEN 100
@@ -32,6 +33,10 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  double cpu_time_used;
+
+  clock_t start = clock(), end;
+
   int count = 0;
   Rectangle *recs = fill_rectangle(argv[1], &count);
   if (!recs) {
@@ -46,6 +51,10 @@ int main(int argc, char *argv[]) {
   write_file(argv[3], recs, count);
 
   free_arr(recs, count);
+
+  end = clock();
+  cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC * 1000;
+  printf("The runtime: %f ms\n", cpu_time_used);
 
   return 0;
 }
@@ -120,7 +129,7 @@ void write_file(const char *filename, Rectangle *recs, int count) {
     perror("Error opening file to write perimeter!");
     exit(EXIT_FAILURE);
   }
-  for (int i = count-1; i > 0; i--){
+  for (int i = count - 1; i > 0; i--) {
     fprintf(f_out, "%s\n", recs[i].id);
   }
   fclose(f_out);

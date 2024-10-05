@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -156,12 +157,20 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  clock_t start, end;
+  double time_used;
+  start = clock();
+
   init_hashmap();
   read_words(argv[1]);
   read_text(argv[2]);
   print_freqs();
 
   free_map();
+
+  end =clock();;
+  time_used = ((double) (end -start)) / CLOCKS_PER_SEC * 1000;
+  printf("The runtime: %f ms\n", time_used);
 
   return 0;
 }
