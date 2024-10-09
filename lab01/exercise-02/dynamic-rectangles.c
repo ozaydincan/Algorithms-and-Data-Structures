@@ -4,7 +4,6 @@
 #include <time.h>
 
 #define ID_LEN 4
-#define MAX_LEN 100
 
 typedef struct Rectangle {
   float x_1;
@@ -14,12 +13,10 @@ typedef struct Rectangle {
   char *id;
   float area;
   float perimeter;
-
 } Rectangle;
 
 void write_file(const char *filename, Rectangle *recs, int count);
 Rectangle *fill_rectangle(const char *infile, int *count);
-void initialize_recs(Rectangle *recs);
 void quicksort_area(Rectangle *recs, int low, int high);
 int partition_area(Rectangle *recs, int low, int high);
 void quicksort_perimeter(Rectangle *recs, int low, int high);
@@ -33,9 +30,8 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  double cpu_time_used;
-
   clock_t start = clock(), end;
+  double cpu_time_used;
 
   int count = 0;
   Rectangle *recs = fill_rectangle(argv[1], &count);
@@ -59,43 +55,41 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void initialize_recs(Rectangle *recs) {
-  for (int i = 0; i < MAX_LEN; i++) {
-    recs[i].id = (char *)malloc(sizeof(char) * (ID_LEN + 1));
-  }
-}
-
-void print_recs(Rectangle *recs, int count) {
-  for (int i = 0; i < count; i++) {
-    printf("%s\nArea => %.2f\nPerimeter => %.2f\n", recs[i].id, recs[i].area,
-           recs[i].perimeter);
-  }
-}
-
 Rectangle *fill_rectangle(const char *infile, int *count) {
   FILE *fp = fopen(infile, "r");
-
   if (!fp) {
     perror("Couldn't open input file!");
     exit(EXIT_FAILURE);
   }
 
-  Rectangle *recs = (Rectangle *)malloc(MAX_LEN * sizeof(Rectangle));
+  fscanf(fp, "%d", count); // Read the number of rectangles
+  Rectangle *recs = (Rectangle *)malloc((*count) * sizeof(Rectangle));
   if (!recs) {
     perror("Memory allocation failed!");
     fclose(fp);
     exit(EXIT_FAILURE);
   }
-  initialize_recs(recs);
+
+  for (int i = 0; i < *count; i++) {
+    recs[i].id = (char *)malloc(sizeof(char) * (ID_LEN + 1));
+    if (!recs[i].id) {
+      perror("Memory allocation for id failed!");
+      fclose(fp);
+      exit(EXIT_FAILURE);
+    }
+  }
+
   float x, y;
   char id[ID_LEN + 1];
-  *count = 0;
+  int rectangles_initialized = 0;
+
   while (fscanf(fp, "%4s %f %f", id, &x, &y) == 3) {
     int found = 0;
-    for (int i = 0; i < *count; i++) {
+    for (int i = 0; i < rectangles_initialized; i++) {
       if (strcmp(recs[i].id, id) == 0) {
         recs[i].x_2 = x;
         recs[i].y_2 = y;
+
         float side_x = (recs[i].x_1 - recs[i].x_2) > 0
                            ? (recs[i].x_1 - recs[i].x_2)
                            : -(recs[i].x_1 - recs[i].x_2);
@@ -104,18 +98,19 @@ Rectangle *fill_rectangle(const char *infile, int *count) {
                            ? (recs[i].y_1 - recs[i].y_2)
                            : -(recs[i].y_1 - recs[i].y_2);
 
-        recs[i].area = side_y * side_x;
-        recs[i].perimeter = 2 * (side_y + side_x);
+        recs[i].area = side_x * side_y;
+        recs[i].perimeter = 2 * (side_x + side_y);
 
         found = 1;
         break;
       }
     }
-    if (found == 0 && *count < MAX_LEN) {
-      recs[*count].id = strdup(id);
-      recs[*count].x_1 = x;
-      recs[*count].y_1 = y;
-      (*count)++;
+
+    if (!found && rectangles_initialized < *count) {
+      strcpy(recs[rectangles_initialized].id, id);
+      recs[rectangles_initialized].x_1 = x;
+      recs[rectangles_initialized].y_1 = y;
+      rectangles_initialized++;
     }
   }
 
@@ -129,16 +124,19 @@ void write_file(const char *filename, Rectangle *recs, int count) {
     perror("Error opening file to write perimeter!");
     exit(EXIT_FAILURE);
   }
+
   for (int i = count - 1; i >= 0; i--) {
     fprintf(f_out, "%s\n", recs[i].id);
   }
   fclose(f_out);
 }
+
 void swap(Rectangle *a, Rectangle *b) {
   Rectangle temp = *a;
   *a = *b;
   *b = temp;
 }
+
 void quicksort_area(Rectangle *recs, int low, int high) {
   if (low < high) {
     int part = partition_area(recs, low, high);
