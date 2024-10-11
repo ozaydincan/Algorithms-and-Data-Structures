@@ -129,11 +129,7 @@ void write_file(const char *filename, Rectangle *recs, int count) {
     perror("Error opening file to write perimeter!");
     exit(EXIT_FAILURE);
   }
-<<<<<<< HEAD
   for (int i = count - 1; i >= 0; i--) {
-=======
-  for (int i = count - 1; i > 0; i--) {
->>>>>>> 60827e97d39b7cdc3a16b45d45f6388697b5157e
     fprintf(f_out, "%s\n", recs[i].id);
   }
   fclose(f_out);
