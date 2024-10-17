@@ -1,0 +1,11 @@
+10
+an
+example
+file
+is
+of
+order
+strings
+this
+to
+used
