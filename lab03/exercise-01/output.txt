@@ -1,0 +1,4 @@
+mi: 1
+illumino: 2
+di: 3
+immenso: 4

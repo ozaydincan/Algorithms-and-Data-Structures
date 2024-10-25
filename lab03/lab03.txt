@@ -1,4 +1,4 @@
-gAlgorithms and Data Structures
+Algorithms and Data Structures
 Laboratory number 03
 --------------------
 
